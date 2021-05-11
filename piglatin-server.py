@@ -51,8 +51,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
             #Block program by waiting data.
             while True:
+                #Receive message from client
                 data = conn.recv(1024)
                 print(f"Received data: {data.decode(encoding='utf-8')}.")
+                #Translate message
                 if exit_status % 2 == 0:
                     pig_string = pig_translate(str(data.decode('utf-8')))
                     print(f"Translated to: {pig_string}.")
@@ -61,16 +63,20 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if not data:
                     break
 
+                #Send the translated message.
                 print("Sending translated data..")
                 conn.sendall(bytes(pig_string, encoding="utf-8"))
                 exit_status += 1
 
                 time.sleep(0.5)
                 if exit_status % 2 == 1:
+                    #Send choice continuation prompt
                     conn.sendall(bytes("Translate again? (Y/N)", encoding="utf-8"))
                     while True:
+                        #Wait for continuiation choice.
                         data2 = conn.recv(1024)
                         if data2:
+                            #Receive choice, break if N.
                             print(f"Received client choice: {data2.decode('utf-8')}")
                             data2string = data2.decode('utf-8')
                             if (data2string == 'N' or data2string == 'n'):
